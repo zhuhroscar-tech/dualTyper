@@ -68,3 +68,32 @@ struct BilingualInsertionFormatterTests {
         #expect(insertion == "你好吗？\n")
     }
 }
+
+@Suite("Language settings")
+struct LanguageSettingsTests {
+    @Test("defaults to English source and Spanish target")
+    func defaults() {
+        let store = InMemoryLanguageSettings()
+
+        #expect(store.languagePair == LanguagePair(source: "en", target: "es"))
+    }
+
+    @Test("persists a selected target language")
+    func selection() {
+        let store = InMemoryLanguageSettings()
+
+        store.targetLanguage = "ja"
+
+        #expect(store.languagePair == LanguagePair(source: "en", target: "ja"))
+    }
+}
+
+@Suite("Translation completion")
+struct TranslationCompletionTests {
+    @Test("translation failure commits the original and leaves a new line")
+    func failureFallback() {
+        let sentence = CompletedSentence(text: "Hello.", trigger: .punctuation)
+
+        #expect(TranslationCompletion.failureInsertion(for: sentence) == "\n")
+    }
+}
