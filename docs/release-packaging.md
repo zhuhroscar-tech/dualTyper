@@ -5,10 +5,17 @@ macOS does not activate an input source merely because the DMG was opened.
 
 ## Development DMG
 
-Place `DualTyper.inputmethod` in a read-only DMG beside an `Install DualTyper`
-launcher or instructions. A manual install copies the bundle to
-`~/Library/Input Methods`, then the user logs out/in and adds DualTyper in
-**System Settings → Keyboard → Text Input → Edit**.
+Build the tested universal local DMG with:
+
+```bash
+./scripts/package-dmg.sh
+```
+
+The output is `dist/DualTyper-0.1.0.dmg`. It contains the input method and
+manual Finder installation instructions. The user copies the bundle to
+`~/Library/Input Methods`, then adds DualTyper in **System Settings → Keyboard
+→ Text Input → Edit**. The local-test DMG intentionally contains no executable
+installer or uninstaller scripts.
 
 ## Commercial distribution
 
@@ -35,3 +42,11 @@ Before release, supply `DEVELOPMENT_TEAM`, enable signing/hardened runtime, and
 review sandbox/temporary Mach registration requirements against the then-current
 InputMethodKit documentation. Notarization and first-run validation on a clean
 macOS 15+ user account are release blockers.
+
+`scripts/package-dmg.sh` intentionally rejects `SIGN_IDENTITY` and
+`NOTARY_PROFILE`; it is a local-test packager, not a commercial release path.
+The commercial pipeline must add a signed installer/uninstaller app or signed
+installer package. Its
+notarization credentials must already exist in the builder's Keychain via
+`xcrun notarytool store-credentials`. Never commit certificate exports,
+Keychain passwords, app-specific passwords, or App Store Connect keys.

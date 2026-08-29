@@ -36,6 +36,13 @@ struct CoreTestRunner {
         var empty = SentenceAccumulator()
         expect(empty.receive(" \n"), [], "empty sentences are ignored")
 
+        expect(InputHandlingPolicy.shouldConsumeReturn(bufferedText: "  \t"), false, "whitespace-only Return passes through")
+        expect(InputHandlingPolicy.shouldConsumeCharacters("مرحبا"), true, "multilingual text is consumed")
+        expect(InputHandlingPolicy.shouldConsumeCharacters("👩🏽‍💻"), true, "emoji text is consumed")
+        expect(InputHandlingPolicy.shouldConsumeCharacters("\t"), false, "Tab passes through")
+        expect(InputHandlingPolicy.shouldConsumeCharacters("\u{001B}"), false, "control characters pass through")
+        expect(InputHandlingPolicy.shouldConsumeCharacters("\u{F700}"), false, "function keys pass through")
+
         var multiple = SentenceAccumulator()
         expect(
             multiple.receive("Hello! How are you? Remaining"),

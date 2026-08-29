@@ -6,13 +6,21 @@ import DualTyperCore
 final class DualTyperInputController: IMKInputController {
     private var accumulator = SentenceAccumulator()
     private var markedText = ""
-    private var translationInFlight = false
+    private var translationGate = TranslationInputGate()
+    private var activationGeneration: UInt = 0
+    private var activeTranslation: Task<Void, Never>?
 
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         guard let event, event.type == .keyDown,
               let client = sender as? IMKTextInput else { return false }
 
+        // Never swallow keys while an asynchronous translation is pending.
+        // Continuing to type moves the selection, which causes the stale
+        // translation to be discarded by the context checks below.
+        guard !translationGate.isTranslationInFlight else { return false }
+
         if event.keyCode == 53 { // Escape
+            guard !markedText.isEmpty else { return false }
             cancelComposition(client)
             return true
         }
@@ -28,21 +36,36 @@ final class DualTyperInputController: IMKInputController {
 
         let input: String
         if event.keyCode == 36 || event.keyCode == 76 {
+            guard InputHandlingPolicy.shouldConsumeReturn(bufferedText: markedText) else {
+                commitComposition(client)
+                return false
+            }
             input = "\n"
-        } else if event.modifierFlags.intersection([.command, .control]).isEmpty,
-                  let characters = event.characters, !characters.isEmpty {
+        } else if event.modifierFlags.intersection([.command, .control, .function]).isEmpty,
+                  let characters = event.characters,
+                  InputHandlingPolicy.shouldConsumeCharacters(characters) {
             input = characters
         } else {
+            commitComposition(client)
             return false
         }
 
-        let completed = accumulator.receive(input)
+        var candidateAccumulator = accumulator
+        let completed = candidateAccumulator.receive(input)
+        guard InputHandlingPolicy.shouldConsumeChunk(
+            completedSentenceCount: completed.count,
+            hasPendingSuffix: !candidateAccumulator.pendingText.isEmpty
+        ) else {
+            commitComposition(client)
+            return false
+        }
+        accumulator = candidateAccumulator
         if input != "\n" && input != "\r" {
             markedText.append(input)
         }
         updateMarkedText(client)
 
-        guard let sentence = completed.first, !translationInFlight else { return true }
+        guard let sentence = completed.first else { return true }
         beginTranslation(sentence, client: client)
         return true
     }
@@ -55,8 +78,18 @@ final class DualTyperInputController: IMKInputController {
         resetState()
     }
 
+    override func activateServer(_ sender: Any!) {
+        activationGeneration &+= 1
+        super.activateServer(sender)
+    }
+
     override func deactivateServer(_ sender: Any!) {
+        activationGeneration &+= 1
+        activeTranslation?.cancel()
+        activeTranslation = nil
+        translationGate.finishTranslation()
         commitComposition(sender)
+        super.deactivateServer(sender)
     }
 
     override func menu() -> NSMenu! {
@@ -88,13 +121,25 @@ final class DualTyperInputController: IMKInputController {
     }
 
     private func beginTranslation(_ sentence: CompletedSentence, client: IMKTextInput) {
-        translationInFlight = true
-        let original = sentence.text + (sentence.trigger == .returnKey ? "\n" : "")
+        guard translationGate.beginTranslation() else { return }
+        let original = TranslationCompletion.originalInsertion(
+            originalText: markedText,
+            trigger: sentence.trigger
+        )
         client.insertText(original, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
         markedText = ""
+        let generation = activationGeneration
+        let clientIdentifier = ObjectIdentifier(client as AnyObject)
+        let expectedSelection = client.selectedRange()
 
-        Task { @MainActor [weak self] in
+        activeTranslation = Task { @MainActor [weak self] in
             guard let self else { return }
+            defer {
+                if generation == self.activationGeneration {
+                    self.translationGate.finishTranslation()
+                    self.activeTranslation = nil
+                }
+            }
             let insertion: String
             do {
                 let translation = try await AppleTranslationHost.shared.translate(sentence.text)
@@ -102,8 +147,12 @@ final class DualTyperInputController: IMKInputController {
             } catch {
                 insertion = TranslationCompletion.failureInsertion(for: sentence)
             }
-            client.insertText(insertion, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
-            self.translationInFlight = false
+            guard !Task.isCancelled,
+                  generation == self.activationGeneration,
+                  let currentClient = self.client(),
+                  ObjectIdentifier(currentClient as AnyObject) == clientIdentifier,
+                  currentClient.selectedRange() == expectedSelection else { return }
+            currentClient.insertText(insertion, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
         }
     }
 

@@ -72,7 +72,7 @@ final class AppleTranslationHost: ObservableObject {
 
     private static func makeConfiguration(_ pair: LanguagePair) -> TranslationSession.Configuration {
         TranslationSession.Configuration(
-            source: Locale.Language(identifier: pair.source),
+            source: pair.source.map(Locale.Language.init(identifier:)),
             target: Locale.Language(identifier: pair.target)
         )
     }

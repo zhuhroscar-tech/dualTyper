@@ -71,11 +71,11 @@ struct BilingualInsertionFormatterTests {
 
 @Suite("Language settings")
 struct LanguageSettingsTests {
-    @Test("defaults to English source and Spanish target")
+    @Test("defaults to automatic source detection and Spanish target")
     func defaults() {
         let store = InMemoryLanguageSettings()
 
-        #expect(store.languagePair == LanguagePair(source: "en", target: "es"))
+        #expect(store.languagePair == LanguagePair(source: nil, target: "es"))
     }
 
     @Test("persists a selected target language")
@@ -84,7 +84,7 @@ struct LanguageSettingsTests {
 
         store.targetLanguage = "ja"
 
-        #expect(store.languagePair == LanguagePair(source: "en", target: "ja"))
+        #expect(store.languagePair == LanguagePair(source: nil, target: "ja"))
     }
 }
 
@@ -95,5 +95,66 @@ struct TranslationCompletionTests {
         let sentence = CompletedSentence(text: "Hello.", trigger: .punctuation)
 
         #expect(TranslationCompletion.failureInsertion(for: sentence) == "\n")
+    }
+
+    @Test("Return failure does not add a second blank line")
+    func returnFailureDoesNotAddBlankLine() {
+        let sentence = CompletedSentence(text: "Hello", trigger: .returnKey)
+
+        #expect(TranslationCompletion.failureInsertion(for: sentence) == "")
+    }
+
+    @Test("committed original text preserves exact whitespace")
+    func originalTextPreservesWhitespace() {
+        #expect(TranslationCompletion.originalInsertion(originalText: "  Hello. ", trigger: .punctuation) == "  Hello. ")
+        #expect(TranslationCompletion.originalInsertion(originalText: "  Hello  ", trigger: .returnKey) == "  Hello  \n")
+    }
+}
+
+@Suite("Translation input gate")
+struct TranslationInputGateTests {
+    @Test("blocks another translation until output order is safe")
+    func blocksWhileBusy() {
+        var gate = TranslationInputGate()
+
+        let first = gate.beginTranslation()
+        let second = gate.beginTranslation()
+        gate.finishTranslation()
+        let third = gate.beginTranslation()
+
+        #expect(first)
+        #expect(!second)
+        #expect(third)
+    }
+}
+
+@Suite("Input handling policy")
+struct InputHandlingPolicyTests {
+    @Test("empty Return passes through to the host application")
+    func emptyReturnPassesThrough() {
+        #expect(!InputHandlingPolicy.shouldConsumeReturn(bufferedText: ""))
+        #expect(!InputHandlingPolicy.shouldConsumeReturn(bufferedText: "  \t"))
+        #expect(InputHandlingPolicy.shouldConsumeReturn(bufferedText: "Hello"))
+    }
+
+    @Test("navigation and control characters pass through to the host")
+    func navigationCharactersPassThrough() {
+        #expect(InputHandlingPolicy.shouldConsumeCharacters("a"))
+        #expect(InputHandlingPolicy.shouldConsumeCharacters("你"))
+        #expect(InputHandlingPolicy.shouldConsumeCharacters("مرحبا"))
+        #expect(InputHandlingPolicy.shouldConsumeCharacters("👩🏽‍💻"))
+        #expect(!InputHandlingPolicy.shouldConsumeCharacters(""))
+        #expect(!InputHandlingPolicy.shouldConsumeCharacters("\t"))
+        #expect(!InputHandlingPolicy.shouldConsumeCharacters("\u{001B}"))
+        #expect(!InputHandlingPolicy.shouldConsumeCharacters("\u{F700}"))
+        #expect(!InputHandlingPolicy.shouldConsumeCharacters("a\u{F703}"))
+    }
+
+    @Test("a chunk with multiple completed sentences passes through intact")
+    func multiSentenceChunkPassesThrough() {
+        #expect(InputHandlingPolicy.shouldConsumeChunk(completedSentenceCount: 0, hasPendingSuffix: true))
+        #expect(InputHandlingPolicy.shouldConsumeChunk(completedSentenceCount: 1, hasPendingSuffix: false))
+        #expect(!InputHandlingPolicy.shouldConsumeChunk(completedSentenceCount: 1, hasPendingSuffix: true))
+        #expect(!InputHandlingPolicy.shouldConsumeChunk(completedSentenceCount: 2, hasPendingSuffix: false))
     }
 }
