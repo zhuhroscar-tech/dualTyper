@@ -1,0 +1,15 @@
+name: Core CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Swift package tests
+        run: swift test
+      - name: Run dependency-free core tests
+        run: ./scripts/test-core.sh
