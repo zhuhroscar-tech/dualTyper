@@ -25,9 +25,9 @@ Platform-independent and unit tested. It owns:
 
 It does not import AppKit, InputMethodKit, SwiftUI, or Translation.
 
-### Input method bundle (integration target)
+### Input method bundle
 
-A non-sandboxed or correctly entitled `.inputmethod` bundle hosted by macOS. It will own:
+A non-sandboxed `.inputmethod` bundle hosted by macOS. It owns:
 
 - `IMKServer` startup;
 - an `IMKInputController` subclass per client session;
@@ -43,7 +43,12 @@ $(PRODUCT_BUNDLE_IDENTIFIER)_Connection
 
 ### Settings/translation host
 
-Apple's customizable `TranslationSession` API is tied to SwiftUI's `translationTask`. The implementation therefore needs a small hidden or menu-bar SwiftUI host that owns a session and exposes it to the input controller through a narrow translation service.
+Apple's customizable `TranslationSession` API is tied to SwiftUI's
+`translationTask`. `AppleTranslationHost` therefore owns a transparent,
+off-screen one-pixel SwiftUI panel. Its appeared view services an `AsyncStream`
+of translation requests with a session. Target language preferences use
+`UserDefaultsLanguageSettings`; changing the menu selection replaces the session
+configuration.
 
 ## Concurrency rules
 

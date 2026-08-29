@@ -1,0 +1,35 @@
+name: DualTyper
+options:
+  minimumXcodeGenVersion: 2.46.0
+  deploymentTarget:
+    macOS: "15.0"
+packages:
+  DualTyperCore:
+    path: .
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+targets:
+  DualTyperInputMethod:
+    type: application
+    platform: macOS
+    sources:
+      - path: InputMethod/Sources
+    dependencies:
+      - package: DualTyperCore
+        product: DualTyperCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: tech.zhuhroscar.DualTyper
+        PRODUCT_NAME: DualTyper
+        WRAPPER_EXTENSION: inputmethod
+        INFOPLIST_FILE: InputMethod/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+        ENABLE_APP_SANDBOX: NO
+        CODE_SIGNING_ALLOWED: NO
+    scheme:
+      testTargets: []
