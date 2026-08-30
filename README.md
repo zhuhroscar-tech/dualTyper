@@ -1,128 +1,107 @@
 # DualTyper
 
-DualTyper is a macOS input method for bilingual communication. You type a sentence in your normal language; when you finish it with sentence-ending punctuation or Return, DualTyper places an on-device translation on the next line.
+DualTyper is a macOS menu-bar translator for bilingual writing. Select a sentence in an editable app and press **Control–Option–T**. DualTyper preserves the exact selected source and inserts Apple’s on-device translation beneath it.
 
 ```text
 Hello, how are you?
 你好，你好吗？
 ```
 
-## Product decisions for the MVP
+## Free build: no Apple Developer Program required
 
-- **System-wide input source:** designed for standard macOS text fields.
-- **Natural original typing:** the original sentence remains visible while it is composed.
-- **Sentence-level translation:** translation starts after `.`, `!`, `?`, `。`, `！`, `？`, or Return so the model has enough context.
-- **Two-line output:** original first, translation second, followed by a fresh line for the next sentence.
-- **Private by default:** the planned translator uses Apple's on-device Translation framework rather than a third-party cloud API.
-- **Selectable language pair:** the target language will be chosen in DualTyper settings; source language may be selected or detected when Apple supports the pair.
+The primary build is now a normal menu-bar app rather than an InputMethodKit keyboard plugin. This avoids the paid Developer ID requirement that prevented the ad-hoc `.inputmethod` bundle from appearing in macOS Text Input settings.
 
-## Current status
+- No $99/year Apple Developer Program membership is required to build or use it.
+- End users do not need Xcode.
+- The app uses Apple’s on-device Translation framework and no project-operated server.
+- It requests **Accessibility** only so it can read and replace the user’s explicit selection.
+- It does not request Input Monitoring or continuously record keystrokes.
+- It appears in the normal macOS menu bar, not the keyboard Input Source menu.
 
-The repository contains the tested, platform-independent core and a first
-buildable InputMethodKit integration:
-
-- multilingual sentence-boundary detection;
-- buffering and commit-trigger modeling;
-- deterministic two-line output formatting;
-- an asynchronous translation-service boundary;
-- a translation-to-insertion pipeline;
-- a selectable `.inputmethod` bundle with marked-text composition;
-- an Apple Translation framework host backed by SwiftUI `translationTask`;
-- persisted target-language selection in the input-source menu;
-- failure fallback that never drops the original sentence.
+The free DMG is deliberately ad-hoc signed and unnotarized. Every user must manually approve the app in **System Settings → Privacy & Security** and then grant Accessibility permission. Managed Macs may prohibit these overrides. See [`docs/free-distribution.md`](docs/free-distribution.md).
 
 ## Requirements
 
-- macOS 15 or later for Apple's customizable `TranslationSession` API
-- Xcode 16 or later to build the input method bundle
-- downloaded Apple translation language assets for the selected pair
+- macOS 15 or later
+- A standard editable text control that exposes its selection through macOS Accessibility
+- Apple translation language assets for the selected language pair
+- User permission to open an unknown-developer app and grant Accessibility access
 
-## Test the core
+## Install the free build
 
-On a healthy Xcode/Swift installation:
+1. Open `DualTyper-0.3.0-FREE-UNNOTARIZED.dmg`.
+2. Drag **DualTyper** to **Applications**.
+3. Try to open `/Applications/DualTyper.app`.
+4. If macOS blocks it, open **System Settings → Privacy & Security**, scroll to **Security**, and click **Open Anyway** for DualTyper. Authenticate locally if macOS asks. Never share that password with anyone.
+5. In DualTyper, click **Allow Accessibility**.
+6. In **Privacy & Security → Accessibility**, turn on DualTyper. If it is absent, click **+** and select `/Applications/DualTyper.app`.
+7. Quit and reopen DualTyper after changing permission.
 
-```bash
-swift test
-```
+An ad-hoc update may reset Accessibility permission because it has no stable Developer ID identity. If that happens, remove the old DualTyper entry from the Accessibility list, add the exact new `/Applications/DualTyper.app`, and turn it on again.
 
-A dependency-free direct runner is also included:
+Apple documents both user-controlled steps:
 
-```bash
-./scripts/test-core.sh
-```
+- [Open an app from an unknown developer](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac)
+- [Allow accessibility apps to access your Mac](https://support.apple.com/guide/mac-help/allow-accessibility-apps-to-access-your-mac-mh43185/mac)
 
-## Build the input method
+## Use DualTyper
 
-The checked-in Xcode project builds without code signing for local installation:
+1. Choose the target language from the DualTyper menu-bar menu.
+2. Keep the DualTyper setup window open or minimized; Apple’s Translation session is owned by that window.
+3. In TextEdit, Notes, or another supported editor, select the exact sentence to translate.
+4. Press **Control–Option–T**.
+5. Keep the same app and selection active while translation completes.
+6. DualTyper rechecks the process, selected text, and selection range immediately before editing. If it detects a change, it inserts nothing.
 
-```bash
-xcodebuild \
-  -project DualTyper.xcodeproj \
-  -scheme DualTyperInputMethod \
-  -configuration Release \
-  -derivedDataPath .build/xcode-release \
-  CODE_SIGNING_ALLOWED=NO \
-  build
-```
+The first request for a language pair may prompt macOS to download Apple’s translation assets.
 
-The bundle is produced at:
+## Compatibility and limitations
 
-```text
-.build/xcode-release/Build/Products/Release/DualTyper.inputmethod
-```
+- The free architecture uses an explicit shortcut, not automatic punctuation detection.
+- The setup window must remain open or minimized because macOS 15 exposes customizable Translation sessions through a SwiftUI view lifecycle.
+- DualTyper refuses macOS secure-input mode and controls exposed with the `AXSecureTextField` subrole.
+- Some web editors, Electron apps, terminals, games, remote desktops, and custom text controls do not expose an editable Accessibility selection.
+- Accessibility has no atomic compare-and-set operation across processes. DualTyper minimizes the interval between its final recheck and replacement, but a tiny unavoidable race remains if the target app changes its selection at exactly that moment.
+- The free build is not notarized. Gatekeeper will reject it until each user grants a local exception.
+- There is no legitimate zero-fee way to remove the unknown-developer warning for arbitrary downloads; Developer ID signing and notarization require Apple Developer Program membership.
+- A company- or school-managed Mac can disable **Open Anyway** or Accessibility approval. No app can safely bypass those administrator policies.
 
-`project.yml` is the maintainable project definition. After changing it,
-regenerate `DualTyper.xcodeproj` with XcodeGen 2.46 or newer:
+## Build and test
 
 ```bash
 xcodegen generate
+swift test
+./scripts/test-core.sh
+xcodebuild \
+  -project DualTyper.xcodeproj \
+  -scheme DualTyperMenuBar \
+  -configuration Release \
+  -derivedDataPath .build/release-menubar \
+  CODE_SIGNING_ALLOWED=NO \
+  ARCHS='arm64 x86_64' \
+  ONLY_ACTIVE_ARCH=NO \
+  build
 ```
 
-## Install and enable locally
-
-Do not run these commands while editing the bundle in place. Copy the completed
-artifact, then enable it through macOS:
+Create and verify the free universal DMG:
 
 ```bash
-mkdir -p "$HOME/Library/Input Methods"
-rm -rf "$HOME/Library/Input Methods/DualTyper.inputmethod"
-cp -R ".build/xcode-release/Build/Products/Release/DualTyper.inputmethod" \
-  "$HOME/Library/Input Methods/"
+./scripts/package-menubar-dmg.sh
 ```
 
-1. Log out and back in (the most reliable way to refresh input sources).
-2. Open **System Settings → Keyboard → Text Input → Edit**.
-3. Press **+**, find **DualTyper**, and add it.
-4. Select **DualTyper** from the menu-bar Input menu.
-5. In TextEdit, type `Hello world?`. The source remains visible as marked text;
-   after `?`, the translated text is inserted on the following line.
-6. Open the DualTyper input-source menu to choose the target language.
+The script verifies tests, direct tests, a universal `arm64 + x86_64` executable, ad-hoc code integrity, exact DMG contents, image integrity, and a portable SHA-256 sidecar.
 
-The first translation for a language pair may cause macOS to request/download
-Apple's on-device language assets. This MVP does not automate or bypass that
-system-owned interaction.
+## Legacy InputMethodKit prototype
 
-To remove the local build, switch to another input source first, then delete
-`~/Library/Input Methods/DualTyper.inputmethod` and log out/in.
-
-## MVP limitations
-
-- Translation availability and language-model downloads are controlled by macOS.
-- The unsigned local build is for development; distribution requires Developer ID
-  signing and notarization.
-- Secure fields and apps with custom text systems may reject InputMethodKit input.
-- Do not finish a second sentence while the first translation is in flight; queued
-  multi-sentence composition is a follow-up integration requirement.
-
-## Architecture
-
-See [`docs/architecture.md`](docs/architecture.md). Release signing, notarization,
-DMG, and installer guidance is in
-[`docs/release-packaging.md`](docs/release-packaging.md).
+The repository still contains the original `.inputmethod` prototype and its independently testable sentence-accumulation core. An ad-hoc InputMethodKit bundle may copy successfully to `~/Library/Input Methods`, but current macOS does not reliably enumerate it as a selectable Input Source. A broadly distributable keyboard Input Source still requires accepted signing and notarization.
 
 ## Privacy
 
-Sentence text is intended to be translated by Apple's on-device Translation framework. DualTyper should not log, persist, or send typed sentence content to a project-operated server. Language-model downloads are managed by macOS and may require network access.
+DualTyper does not log, persist, or send selected sentence text to a project-operated server. Selected text is passed to Apple’s Translation framework in memory. macOS manages translation-language downloads. Accessibility is powerful permission; users should install only artifacts obtained from a trusted source and verify the published SHA-256 checksum.
+
+## Architecture
+
+See [`docs/architecture.md`](docs/architecture.md) and [`docs/free-distribution.md`](docs/free-distribution.md).
 
 ## License
 

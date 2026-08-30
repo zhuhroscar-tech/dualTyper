@@ -1,4 +1,6 @@
+import Foundation
 import Testing
+import os
 @testable import DualTyperCore
 
 @Suite("Sentence accumulator")
@@ -156,5 +158,217 @@ struct InputHandlingPolicyTests {
         #expect(InputHandlingPolicy.shouldConsumeChunk(completedSentenceCount: 1, hasPendingSuffix: false))
         #expect(!InputHandlingPolicy.shouldConsumeChunk(completedSentenceCount: 1, hasPendingSuffix: true))
         #expect(!InputHandlingPolicy.shouldConsumeChunk(completedSentenceCount: 2, hasPendingSuffix: false))
+    }
+}
+
+@Suite("Selection translation plan")
+struct SelectionTranslationPlanTests {
+    @Test("preserves the selected source exactly and adds translation beneath it")
+    func preservesSourceExactly() {
+        let replacement = SelectionTranslationPlan.replacement(
+            source: "  Hello, how are you?  ",
+            translation: "你好，你好吗？"
+        )
+
+        #expect(replacement == "  Hello, how are you?  \n你好，你好吗？")
+    }
+
+    @Test("rejects empty selected text")
+    func rejectsEmptySelection() {
+        #expect(SelectionTranslationPlan.isValidSource("") == false)
+        #expect(SelectionTranslationPlan.isValidSource(" \n\t") == false)
+        #expect(SelectionTranslationPlan.isValidSource("Hello") == true)
+    }
+}
+
+@Suite("Selection translation guard")
+struct SelectionTranslationGuardTests {
+    private let original = TranslationSelectionSnapshot(
+        processIdentifier: 42,
+        selectedText: "Hello.",
+        location: 10,
+        length: 6
+    )
+
+    @Test("allows insertion only when app text and range are unchanged")
+    func acceptsUnchangedSelection() {
+        #expect(SelectionTranslationGuard.canApply(original: original, current: original))
+    }
+
+    @Test("rejects a different frontmost application")
+    func rejectsDifferentApplication() {
+        let current = TranslationSelectionSnapshot(
+            processIdentifier: 99,
+            selectedText: "Hello.",
+            location: 10,
+            length: 6
+        )
+
+        #expect(!SelectionTranslationGuard.canApply(original: original, current: current))
+    }
+
+    @Test("rejects changed text or selection range")
+    func rejectsChangedSelection() {
+        let changedText = TranslationSelectionSnapshot(
+            processIdentifier: 42,
+            selectedText: "Goodbye.",
+            location: 10,
+            length: 8
+        )
+        let changedRange = TranslationSelectionSnapshot(
+            processIdentifier: 42,
+            selectedText: "Hello.",
+            location: 11,
+            length: 6
+        )
+
+        #expect(!SelectionTranslationGuard.canApply(original: original, current: changedText))
+        #expect(!SelectionTranslationGuard.canApply(original: original, current: changedRange))
+    }
+}
+
+@Suite("Translation session recovery policy")
+struct TranslationSessionRecoveryPolicyTests {
+    @Test("resets after timeout or caller cancellation")
+    func resetsInterruptedSessions() {
+        #expect(TranslationSessionRecoveryPolicy.shouldReset(after: .timedOut))
+        #expect(TranslationSessionRecoveryPolicy.shouldReset(after: .cancelled))
+    }
+
+    @Test("does not reset for invalidation or a normal translation error")
+    func keepsHealthySessions() {
+        #expect(!TranslationSessionRecoveryPolicy.shouldReset(after: .invalidated))
+        #expect(!TranslationSessionRecoveryPolicy.shouldReset(after: .translationFailure))
+    }
+}
+
+@Suite("Window presentation retry policy")
+struct WindowPresentationRetryPolicyTests {
+    @Test("retries until the setup window exists")
+    func retriesWhileMissing() {
+        #expect(WindowPresentationRetryPolicy.shouldRetry(attempt: 0, windowFound: false))
+        #expect(WindowPresentationRetryPolicy.shouldRetry(attempt: 9, windowFound: false))
+    }
+
+    @Test("stops when found or retry budget is exhausted")
+    func stopsAppropriately() {
+        #expect(!WindowPresentationRetryPolicy.shouldRetry(attempt: 0, windowFound: true))
+        #expect(!WindowPresentationRetryPolicy.shouldRetry(attempt: 10, windowFound: false))
+    }
+}
+
+@Suite("Translation session lifecycle")
+struct TranslationSessionLifecycleTests {
+    @Test("requires a live session")
+    func requiresLiveSession() {
+        var state = TranslationSessionLifecycle()
+        let session = UUID()
+
+        #expect(!state.isAvailable)
+        state.begin(session)
+        #expect(state.isAvailable)
+        state.end(session)
+        #expect(!state.isAvailable)
+    }
+
+    @Test("ending a stale session does not deactivate its replacement")
+    func ignoresStaleSessionEnd() {
+        var state = TranslationSessionLifecycle()
+        let oldSession = UUID()
+        let newSession = UUID()
+
+        state.begin(oldSession)
+        state.begin(newSession)
+        state.end(oldSession)
+
+        #expect(state.isAvailable)
+        #expect(state.activeSession == newSession)
+    }
+}
+
+@Suite("Thread-safe callback relay")
+struct SendableCallbackRelayTests {
+    @Test("invokes the current callback and stops after clear")
+    func invokesAndClears() {
+        let relay = SendableCallbackRelay()
+        let state = OSAllocatedUnfairLock(initialState: 0)
+
+        relay.set {
+            state.withLock { value in value += 1 }
+        }
+        relay.invoke()
+        relay.clear()
+        relay.invoke()
+
+        #expect(state.withLock { $0 } == 1)
+    }
+}
+
+@Suite("Text control security policy")
+struct TextControlSecurityPolicyTests {
+    @Test("rejects the macOS secure text-field subrole")
+    func rejectsSecureTextField() {
+        #expect(TextControlSecurityPolicy.isSecure(subrole: "AXSecureTextField"))
+    }
+
+    @Test("allows ordinary and unavailable subroles")
+    func allowsOrdinaryTextFields() {
+        #expect(!TextControlSecurityPolicy.isSecure(subrole: "AXStandardTextField"))
+        #expect(!TextControlSecurityPolicy.isSecure(subrole: nil))
+    }
+}
+
+@Suite("Translation request coordinator")
+struct TranslationRequestCoordinatorTests {
+    @Test("delivers work and resumes its requester")
+    func completesRequest() async throws {
+        let coordinator = TranslationRequestCoordinator()
+        let resultTask = Task {
+            try await coordinator.request(text: "Hello", timeout: .seconds(1))
+        }
+
+        var iterator = coordinator.workItems.makeAsyncIterator()
+        let item = await iterator.next()
+        #expect(item?.text == "Hello")
+
+        if let item {
+            await coordinator.succeed(id: item.id, translation: "Hola")
+        }
+        #expect(try await resultTask.value == "Hola")
+    }
+
+    @Test("times out when no translation session serves the request")
+    func timesOutRequest() async {
+        let coordinator = TranslationRequestCoordinator()
+
+        do {
+            _ = try await coordinator.request(text: "Hello", timeout: .milliseconds(20))
+            Issue.record("Expected the request to time out")
+        } catch let error as TranslationRequestCoordinatorError {
+            #expect(error == .timedOut)
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+    }
+
+    @Test("invalidating a language session resumes all waiters")
+    func invalidatesWaiters() async {
+        let coordinator = TranslationRequestCoordinator()
+        let resultTask = Task {
+            try await coordinator.request(text: "Hello", timeout: .seconds(1))
+        }
+
+        var iterator = coordinator.workItems.makeAsyncIterator()
+        _ = await iterator.next()
+        await coordinator.invalidateAll()
+
+        do {
+            _ = try await resultTask.value
+            Issue.record("Expected invalidation")
+        } catch let error as TranslationRequestCoordinatorError {
+            #expect(error == .invalidated)
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
     }
 }

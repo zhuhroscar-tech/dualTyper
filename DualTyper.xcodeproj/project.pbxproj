@@ -7,21 +7,43 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2A41C81AB87A43F330A6843E /* GlobalHotKeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5386725B897E83385C3E43 /* GlobalHotKeyMonitor.swift */; };
 		3CE3535E65EC5DC7E162AE95 /* AppleTranslationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D511D7193D6B16F1755C01A /* AppleTranslationHost.swift */; };
 		5234B20FE043A6E08E12B626 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71DD1A89B5A0EC09D219C4CA /* main.swift */; };
+		64F65BBDD18293873D191A7D /* DualTyperCore in Frameworks */ = {isa = PBXBuildFile; productRef = DD9F9957F152540F902F1D64 /* DualTyperCore */; };
+		6A9776730C654E84CC8BE3AD /* AccessibilityTextService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A829D619D43787131C3EAC1C /* AccessibilityTextService.swift */; };
+		6D47DC2A9520BF64942F3991 /* AppleTranslationHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3CCA7605A36B6977DBDB23 /* AppleTranslationHost.swift */; };
 		9A8104307D3A98198CE9D971 /* DualTyperCore in Frameworks */ = {isa = PBXBuildFile; productRef = 850FB5E2B886F6CC2A9D2859 /* DualTyperCore */; };
+		BD047454A8677BF170BB051D /* DualTyperController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E8ADE79E0AF6F64756D491 /* DualTyperController.swift */; };
+		D1CF3ACCDDEABBA100A2E7BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24126AF54F032C4A23377AD7 /* Assets.xcassets */; };
 		E12095E90A8FB6D2822EFDBA /* DualTyperInputController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8DE644C4E9848EC26049AD7 /* DualTyperInputController.swift */; };
+		E15A06767C1EEE3AB9A494F1 /* DualTyperMenuBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F8898C86C005906BA45986B /* DualTyperMenuBarApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1B5386725B897E83385C3E43 /* GlobalHotKeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKeyMonitor.swift; sourceTree = "<group>"; };
+		24126AF54F032C4A23377AD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		24A4EDCF31ACBD110FBEB6DD /* DualTyperMenuBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DualTyperMenuBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E3CCA7605A36B6977DBDB23 /* AppleTranslationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleTranslationHost.swift; sourceTree = "<group>"; };
 		4E6B047F9F5EC201BC8C86C0 /* dualTyper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = dualTyper; path = .; sourceTree = SOURCE_ROOT; };
 		5D511D7193D6B16F1755C01A /* AppleTranslationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleTranslationHost.swift; sourceTree = "<group>"; };
+		5F8898C86C005906BA45986B /* DualTyperMenuBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualTyperMenuBarApp.swift; sourceTree = "<group>"; };
 		71DD1A89B5A0EC09D219C4CA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		80E8ADE79E0AF6F64756D491 /* DualTyperController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualTyperController.swift; sourceTree = "<group>"; };
+		A829D619D43787131C3EAC1C /* AccessibilityTextService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityTextService.swift; sourceTree = "<group>"; };
 		A8DE644C4E9848EC26049AD7 /* DualTyperInputController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualTyperInputController.swift; sourceTree = "<group>"; };
 		BCB03FF018A6215068F5EC3D /* DualTyperInputMethod.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DualTyperInputMethod.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0C74C1DC70BCAD1C62BCB6E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				64F65BBDD18293873D191A7D /* DualTyperCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		90F5C8F36A1E8060575E5164 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -44,11 +66,26 @@
 			path = InputMethod/Sources;
 			sourceTree = "<group>";
 		};
+		25C4813C8D5E5AB42C5A3431 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A829D619D43787131C3EAC1C /* AccessibilityTextService.swift */,
+				3E3CCA7605A36B6977DBDB23 /* AppleTranslationHost.swift */,
+				80E8ADE79E0AF6F64756D491 /* DualTyperController.swift */,
+				5F8898C86C005906BA45986B /* DualTyperMenuBarApp.swift */,
+				1B5386725B897E83385C3E43 /* GlobalHotKeyMonitor.swift */,
+			);
+			name = Sources;
+			path = MenuBar/Sources;
+			sourceTree = "<group>";
+		};
 		6EFE7FE4A5C871C18447896A = {
 			isa = PBXGroup;
 			children = (
+				B62DC876E31C8788AC08CFC6 /* MenuBar */,
 				9FA19F02B67752EE2D9BF84D /* Packages */,
 				0DC07BF84056DC1415A275B4 /* Sources */,
+				25C4813C8D5E5AB42C5A3431 /* Sources */,
 				C138D1EF00A6CDF9599B533A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,10 +98,19 @@
 			name = Packages;
 			sourceTree = "<group>";
 		};
+		B62DC876E31C8788AC08CFC6 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				24126AF54F032C4A23377AD7 /* Assets.xcassets */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
 		C138D1EF00A6CDF9599B533A /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				BCB03FF018A6215068F5EC3D /* DualTyperInputMethod.app */,
+				24A4EDCF31ACBD110FBEB6DD /* DualTyperMenuBar.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -72,6 +118,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		37865FE179527A955FA3D560 /* DualTyperMenuBar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DF2EC6B0E418E6E3245F6D6 /* Build configuration list for PBXNativeTarget "DualTyperMenuBar" */;
+			buildPhases = (
+				18DBBEA34F71E4C82B2B9E0B /* Sources */,
+				D713EBCF9B741F41D258AFE0 /* Resources */,
+				0C74C1DC70BCAD1C62BCB6E9 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DualTyperMenuBar;
+			packageProductDependencies = (
+				DD9F9957F152540F902F1D64 /* DualTyperCore */,
+			);
+			productName = DualTyperMenuBar;
+			productReference = 24A4EDCF31ACBD110FBEB6DD /* DualTyperMenuBar.app */;
+			productType = "com.apple.product-type.application";
+		};
 		8B44DDDFA93A2C74BE26A04C /* DualTyperInputMethod */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6853EB1192B388621703634F /* Build configuration list for PBXNativeTarget "DualTyperInputMethod" */;
@@ -100,6 +166,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					37865FE179527A955FA3D560 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
 					8B44DDDFA93A2C74BE26A04C = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
@@ -124,11 +194,35 @@
 			projectRoot = "";
 			targets = (
 				8B44DDDFA93A2C74BE26A04C /* DualTyperInputMethod */,
+				37865FE179527A955FA3D560 /* DualTyperMenuBar */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		D713EBCF9B741F41D258AFE0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D1CF3ACCDDEABBA100A2E7BF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		18DBBEA34F71E4C82B2B9E0B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6A9776730C654E84CC8BE3AD /* AccessibilityTextService.swift in Sources */,
+				6D47DC2A9520BF64942F3991 /* AppleTranslationHost.swift in Sources */,
+				BD047454A8677BF170BB051D /* DualTyperController.swift in Sources */,
+				E15A06767C1EEE3AB9A494F1 /* DualTyperMenuBarApp.swift in Sources */,
+				2A41C81AB87A43F330A6843E /* GlobalHotKeyMonitor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		21ED6349EE2EC6157D27422C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -142,6 +236,23 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		01568603614E6B0E5BC365D8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MenuBar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = tech.zhuhroscar.DualTyper.MenuBar;
+				PRODUCT_MODULE_NAME = DualTyperMenuBar;
+				PRODUCT_NAME = DualTyper;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		343F9EE91605A478D99D7D7D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -299,9 +410,35 @@
 			};
 			name = Release;
 		};
+		CDA33265CB21EFFA70ED6533 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MenuBar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = tech.zhuhroscar.DualTyper.MenuBar;
+				PRODUCT_MODULE_NAME = DualTyperMenuBar;
+				PRODUCT_NAME = DualTyper;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3DF2EC6B0E418E6E3245F6D6 /* Build configuration list for PBXNativeTarget "DualTyperMenuBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDA33265CB21EFFA70ED6533 /* Debug */,
+				01568603614E6B0E5BC365D8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		61BE508CED6FAD254E4AB5D0 /* Build configuration list for PBXProject "DualTyper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -331,6 +468,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		850FB5E2B886F6CC2A9D2859 /* DualTyperCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DualTyperCore;
+		};
+		DD9F9957F152540F902F1D64 /* DualTyperCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DualTyperCore;
 		};
