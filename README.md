@@ -1,6 +1,14 @@
 # DualTyper
 
+[![Core CI](https://github.com/zhuhroscar-tech/dualTyper/actions/workflows/core.yml/badge.svg)](https://github.com/zhuhroscar-tech/dualTyper/actions/workflows/core.yml)
+[![Release](https://img.shields.io/github/v/release/zhuhroscar-tech/dualTyper?include_prereleases&label=release)](https://github.com/zhuhroscar-tech/dualTyper/releases/tag/v0.3.0)
+![macOS 15+](https://img.shields.io/badge/macOS-15%2B-111111?logo=apple)
+
 DualTyper is a macOS menu-bar translator for bilingual writing. Select a sentence in an editable app and press **Control–Option–T**. DualTyper preserves the exact selected source and inserts Apple’s on-device translation beneath it.
+
+![DualTyper setup window explaining its explicit Accessibility permission and keyboard shortcut](docs/images/dualtyper-setup.png)
+
+[Download the free v0.3.0 prerelease](https://github.com/zhuhroscar-tech/dualTyper/releases/tag/v0.3.0) · [Architecture](docs/architecture.md) · [Free distribution guide](docs/free-distribution.md)
 
 ```text
 Hello, how are you?
