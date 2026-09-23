@@ -46,6 +46,7 @@ Building the app requires Xcode and XcodeGen 2.46+. Start with:
 xcodegen generate
 swift test
 ./scripts/test-core.sh
+python3 -m unittest discover -s Tests/RepositoryContractTests -v
 ./scripts/package-menubar-dmg.sh
 ```
 

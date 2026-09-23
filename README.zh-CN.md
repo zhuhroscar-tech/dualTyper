@@ -46,6 +46,7 @@
 xcodegen generate
 swift test
 ./scripts/test-core.sh
+python3 -m unittest discover -s Tests/RepositoryContractTests -v
 ./scripts/package-menubar-dmg.sh
 ```
 

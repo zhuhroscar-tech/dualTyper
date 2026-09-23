@@ -13,3 +13,5 @@ jobs:
         run: swift test
       - name: Run dependency-free core tests
         run: ./scripts/test-core.sh
+      - name: Run repository contract tests
+        run: python3 -m unittest discover -s Tests/RepositoryContractTests -v
