@@ -50,6 +50,6 @@ python3 -m unittest discover -s Tests/RepositoryContractTests -v
 ./scripts/package-menubar-dmg.sh
 ```
 
-打包脚本会构建并检查 universal app 和 DMG。应用生命周期、签名及打包校验说明见[架构文档](docs/architecture.md)和[分发指南](docs/free-distribution.md)。
+打包脚本会构建并检查 universal app 和 DMG。应用生命周期、签名、打包校验和源码发布历史请见[架构文档](docs/architecture.md)、[分发指南](docs/free-distribution.md)与[更新日志](CHANGELOG.md)。
 
 [MIT 许可证](LICENSE)。

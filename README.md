@@ -50,6 +50,6 @@ python3 -m unittest discover -s Tests/RepositoryContractTests -v
 ./scripts/package-menubar-dmg.sh
 ```
 
-The packaging script builds and checks the universal app and DMG. See [architecture](docs/architecture.md) and [distribution details](docs/free-distribution.md) for the app lifecycle, signing, and packaging checks.
+The packaging script builds and checks the universal app and DMG. See [architecture](docs/architecture.md), [distribution details](docs/free-distribution.md), and the [changelog](CHANGELOG.md) for the app lifecycle, signing, packaging checks, and source-release history.
 
 [MIT license](LICENSE).

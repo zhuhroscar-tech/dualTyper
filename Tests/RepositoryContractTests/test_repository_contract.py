@@ -11,6 +11,7 @@ class RepositoryContractTests(unittest.TestCase):
         required = [
             "README.md",
             "README.zh-CN.md",
+            "CHANGELOG.md",
             "LICENSE",
             "Package.swift",
             "project.yml",
@@ -50,6 +51,18 @@ class RepositoryContractTests(unittest.TestCase):
         if bytes_match is None:
             self.fail("release docs must publish an artifact byte count")
         self.assertGreater(int(bytes_match.group(1)), 0)
+
+    def test_changelog_tracks_source_releases_without_relabeling_download(self):
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        zh_readme = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+
+        for version in ("0.3.2", "0.3.1", "0.3.0", "0.1.0"):
+            self.assertRegex(changelog, rf"(?m)^## {re.escape(version)}\b", f"missing changelog entry for {version}")
+        self.assertIn("source-quality release", changelog)
+        self.assertIn("downloadable DMG remains `v0.3.0`", changelog)
+        self.assertIn("CHANGELOG.md", readme)
+        self.assertIn("CHANGELOG.md", zh_readme)
 
     def test_ci_exercises_core_test_paths(self):
         workflow = (ROOT / ".github" / "workflows" / "core.yml").read_text(encoding="utf-8")
