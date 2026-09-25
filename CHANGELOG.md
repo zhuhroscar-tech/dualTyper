@@ -2,6 +2,13 @@
 
 All notable DualTyper source and distribution changes are tracked here.
 
+## 0.3.3 — 2026-09-25
+
+- Made Core CI's release-tag coverage explicit so source-release tags continue running the same Swift, core, and repository-contract checks as main.
+- Added repository-contract coverage for the tag-triggered CI contract.
+
+This is a source-quality release. The current downloadable DMG remains `v0.3.0` until the next packaged build.
+
 ## 0.3.2 — 2026-09-24
 
 - Added a maintained changelog so users can distinguish source-quality maintenance releases from the current downloadable app build.

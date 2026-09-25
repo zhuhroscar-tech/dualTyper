@@ -57,7 +57,7 @@ class RepositoryContractTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         zh_readme = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
 
-        for version in ("0.3.2", "0.3.1", "0.3.0", "0.1.0"):
+        for version in ("0.3.3", "0.3.2", "0.3.1", "0.3.0", "0.1.0"):
             self.assertRegex(changelog, rf"(?m)^## {re.escape(version)}\b", f"missing changelog entry for {version}")
         self.assertIn("source-quality release", changelog)
         self.assertIn("downloadable DMG remains `v0.3.0`", changelog)
@@ -66,6 +66,8 @@ class RepositoryContractTests(unittest.TestCase):
 
     def test_ci_exercises_core_test_paths(self):
         workflow = (ROOT / ".github" / "workflows" / "core.yml").read_text(encoding="utf-8")
+        self.assertIn("branches: [main]", workflow)
+        self.assertIn('tags: ["v*"]', workflow)
         self.assertIn("swift test", workflow)
         self.assertIn("./scripts/test-core.sh", workflow)
         self.assertIn("python3 -m unittest discover -s Tests/RepositoryContractTests -v", workflow)
