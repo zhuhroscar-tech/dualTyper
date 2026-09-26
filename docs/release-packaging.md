@@ -1,52 +1,53 @@
 # Release packaging
 
-The `.inputmethod` bundle is the installable engine. A DMG is only a transport;
-macOS does not activate an input source merely because the DMG was opened.
+DualTyper's supported public artifact is the shortcut-driven menu-bar app, not
+the legacy InputMethodKit prototype. The `.inputmethod` target remains in the
+repository for reference, but ad-hoc input-source registration is unreliable and
+must not be presented as the current install path.
 
-## Development DMG
+## Free menu-bar DMG
 
 Build the tested universal local DMG with:
 
 ```bash
-./scripts/package-dmg.sh
+./scripts/package-menubar-dmg.sh
 ```
 
-The output is `dist/DualTyper-0.1.0.dmg`. It contains the input method and
-manual Finder installation instructions. The user copies the bundle to
-`~/Library/Input Methods`, then adds DualTyper in **System Settings → Keyboard
-→ Text Input → Edit**. The local-test DMG intentionally contains no executable
-installer or uninstaller scripts.
+The output is `dist/DualTyper-<version>-FREE-UNNOTARIZED.dmg`. It contains:
 
-## Commercial distribution
+```text
+DualTyper.app
+Applications -> /Applications
+```
 
-Do not ship the current unsigned local artifact. A release pipeline should:
+The app is ad-hoc signed and intentionally unnotarized, so users must approve the
+unknown-developer app locally and grant Accessibility permission themselves. The
+packager verifies the Swift test suite, direct core tests, universal
+architectures, structural code signature, DMG payload, checksum sidecar, and
+Gatekeeper rejection. See `docs/free-distribution.md` for the exact user-facing
+verification and permission language.
 
-1. Build `DualTyper.inputmethod` in Release for arm64 and x86_64.
-2. Sign the nested executable and bundle with a Developer ID Application
-   identity, hardened runtime, and the final reverse-DNS bundle identifier.
+## Legacy input-method prototype
+
+`scripts/package-dmg.sh` builds the old `DualTyper.inputmethod` development
+artifact. It is useful only for local experiments with InputMethodKit and manual
+copying to `~/Library/Input Methods`; it is not the downloadable release product
+and should not be linked from end-user installation instructions.
+
+## Developer ID distribution
+
+A notarized commercial-grade menu-bar release should:
+
+1. Build `DualTyper.app` in Release for arm64 and x86_64.
+2. Sign the app with a Developer ID Application identity and hardened runtime.
 3. Validate the signature with `codesign --verify --deep --strict --verbose=2`.
-4. Put the signed input method and a signed installer/uninstaller app in a DMG.
-   The installer should copy only after explicit user action, replace old
-   versions safely, and explain the required logout/input-source steps.
+4. Put the signed app and Applications symlink in a DMG.
 5. Sign the DMG, submit it with `notarytool`, staple the ticket, then validate
-   with `spctl` on a clean Mac.
+   with `spctl` on a clean macOS 15+ user account.
 6. Publish a checksum and retain symbols for each release.
 
-A polished installer should also detect an existing version, avoid modifying
-System Settings automatically, provide uninstall, and link to privacy/support
-material. Apple Translation language-model prompts and downloads remain
-system-owned and must not be automated.
-
-The current target intentionally disables signing for reproducible local builds.
-Before release, supply `DEVELOPMENT_TEAM`, enable signing/hardened runtime, and
-review sandbox/temporary Mach registration requirements against the then-current
-InputMethodKit documentation. Notarization and first-run validation on a clean
-macOS 15+ user account are release blockers.
-
-`scripts/package-dmg.sh` intentionally rejects `SIGN_IDENTITY` and
-`NOTARY_PROFILE`; it is a local-test packager, not a commercial release path.
-The commercial pipeline must add a signed installer/uninstaller app or signed
-installer package. Its
-notarization credentials must already exist in the builder's Keychain via
-`xcrun notarytool store-credentials`. Never commit certificate exports,
-Keychain passwords, app-specific passwords, or App Store Connect keys.
+Apple Translation language-model prompts and downloads remain system-owned and
+must not be automated. Notarization credentials must already exist in the
+builder's Keychain via `xcrun notarytool store-credentials`. Never commit
+certificate exports, Keychain passwords, app-specific passwords, or App Store
+Connect keys.

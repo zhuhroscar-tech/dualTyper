@@ -52,12 +52,24 @@ class RepositoryContractTests(unittest.TestCase):
             self.fail("release docs must publish an artifact byte count")
         self.assertGreater(int(bytes_match.group(1)), 0)
 
+    def test_release_packaging_points_to_supported_menu_bar_artifact(self):
+        packaging = (ROOT / "docs" / "release-packaging.md").read_text(encoding="utf-8")
+
+        self.assertIn("supported public artifact is the shortcut-driven menu-bar app", packaging)
+        self.assertIn("./scripts/package-menubar-dmg.sh", packaging)
+        self.assertIn("DualTyper.app", packaging)
+        self.assertIn("Applications -> /Applications", packaging)
+        self.assertIn("not the downloadable release product", packaging)
+        self.assertNotIn("The `.inputmethod` bundle is the installable engine", packaging)
+        self.assertNotIn("dist/DualTyper-0.1.0.dmg", packaging)
+        self.assertNotIn("System Settings → Keyboard", packaging)
+
     def test_changelog_tracks_source_releases_without_relabeling_download(self):
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         zh_readme = (ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
 
-        for version in ("0.3.3", "0.3.2", "0.3.1", "0.3.0", "0.1.0"):
+        for version in ("0.3.4", "0.3.3", "0.3.2", "0.3.1", "0.3.0", "0.1.0"):
             self.assertRegex(changelog, rf"(?m)^## {re.escape(version)}\b", f"missing changelog entry for {version}")
         self.assertIn("source-quality release", changelog)
         self.assertIn("downloadable DMG remains `v0.3.0`", changelog)

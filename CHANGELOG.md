@@ -2,6 +2,13 @@
 
 All notable DualTyper source and distribution changes are tracked here.
 
+## 0.3.4 — 2026-09-26
+
+- Corrected stale release-packaging documentation that still described the legacy InputMethodKit `.inputmethod` artifact as the installable engine.
+- Added repository-contract coverage so packaging docs keep pointing users to the supported menu-bar DMG and keep the input-method prototype clearly marked as non-release-only.
+
+This is a source-quality release. The current downloadable DMG remains `v0.3.0` until the next packaged build.
+
 ## 0.3.3 — 2026-09-25
 
 - Made Core CI's release-tag coverage explicit so source-release tags continue running the same Swift, core, and repository-contract checks as main.
